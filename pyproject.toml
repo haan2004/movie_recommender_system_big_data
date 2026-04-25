@@ -1,0 +1,22 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "recsys-bigdata"
+version = "0.1.0"
+description = "A real-time hybrid recommender system library"
+readme = "README.md"
+requires-python = ">=3.8"
+dependencies = [
+    "flask",
+    "confluent-kafka",
+    "qdrant-client",
+    "sentence-transformers",
+    "pandas",
+    "pyspark",
+    "torch"
+]
+
+[tool.setuptools.packages.find]
+where = ["src"]

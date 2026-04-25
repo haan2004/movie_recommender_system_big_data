@@ -1,0 +1,22 @@
+# Core Web & API
+flask==3.0.0
+flask-cors==4.0.0
+
+# Messaging & Streaming
+confluent-kafka==2.3.0
+
+# Vector Database & Embeddings
+qdrant-client==1.17.1
+sentence-transformers==2.2.2
+torch==2.1.0
+
+# Data Processing
+pandas==2.1.1
+numpy==1.26.0
+
+# Big Data (Upcoming)
+pyspark==3.5.0
+
+# Utilities
+python-dotenv==1.0.0
+requests==2.31.0

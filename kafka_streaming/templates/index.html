@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RecSys | Real-time Kafka Feed</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #0f172a;
+            --card-bg: rgba(30, 41, 59, 0.7);
+            --accent-color: #38bdf8;
+            --text-color: #f8fafc;
+            --success: #10b981;
+        }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            height: 95vh;
+            gap: 20px;
+        }
+
+        /* Container Layout */
+        .main-content { flex: 3; display: flex; flex-direction: column; gap: 20px; }
+        .sidebar { flex: 1; background: var(--card-bg); border-radius: 16px; backdrop-filter: blur(10px); padding: 20px; display: flex; flex-direction: column; border: 1px solid rgba(255,255,255,0.1); }
+
+        h1, h2 { margin: 0; color: var(--accent-color); }
+        
+        header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .search-bar { background: var(--card-bg); padding: 5px; border-radius: 30px; display: flex; width: 450px; border: 1px solid rgba(255,255,255,0.1); }
+        .search-bar input { background: transparent; border: none; color: white; padding: 10px 20px; flex: 1; outline: none; font-size: 0.9rem; }
+        .search-bar button { background: var(--accent-color); border-radius: 20px; width: auto; padding: 0 20px; color: var(--bg-color); font-weight: bold; }
+
+        /* Movie Grid */
+        .movie-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 15px; }
+
+        .search-results-section { margin-top: 10px; display: none; overflow-y: auto; flex: 1; margin-bottom: 20px; }
+        .search-results-section.active { display: block; }
+        .search-result-item { background: rgba(255,255,255,0.03); margin-bottom: 10px; padding: 15px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.05); }
+        .search-result-item h4 { margin: 0; color: var(--accent-color); }
+        .search-result-item p { margin: 8px 0 0 0; font-size: 0.9rem; opacity: 0.8; line-height: 1.5; color: #cbd5e1; }
+        .movie-card { background: var(--card-bg); border-radius: 12px; overflow: hidden; transition: transform 0.3s ease; border: 1px solid rgba(255,255,255,0.05); }
+        .movie-card:hover { transform: translateY(-5px); border-color: var(--accent-color); }
+        .movie-card img { width: 100%; height: 250px; object-fit: cover; background: #334155; }
+        .card-info { padding: 12px; }
+        .card-info h3 { margin: 0 0 10px 0; font-size: 1rem; }
+        
+        .btn-group { display: flex; gap: 8px; }
+        button { flex: 1; padding: 8px; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; transition: opacity 0.2s; }
+        .btn-click { background: var(--accent-color); color: var(--bg-color); }
+        .btn-rate { background: transparent; border: 1px solid var(--accent-color); color: var(--accent-color); }
+        button:hover { opacity: 0.8; }
+
+        /* Live Feed */
+        .feed-container { flex: 1; overflow-y: auto; margin-top: 15px; font-family: 'Courier New', Courier, monospace; font-size: 0.85rem; }
+        .feed-item { margin-bottom: 8px; padding-bottom: 8px; border-bottom: 1px solid rgba(255,255,255,0.05); }
+        .feed-item span { color: var(--success); }
+        .type-Rating { color: #f59e0b !important; }
+
+        /* Recommendations */
+        .recommendation-panel { background: rgba(56, 189, 248, 0.1); border-radius: 12px; padding: 15px; border-left: 4px solid var(--accent-color); }
+    </style>
+</head>
+<body>
+
+    <div class="main-content">
+        <header>
+            <div>
+                <h1>🎬 BigData Recommender</h1>
+                <p>Interactive Demo: Click and Rate movies to see real-time Kafka streams.</p>
+            </div>
+            <div class="search-bar">
+                <input type="text" id="searchInput" placeholder="Search by description (e.g. dinosaur theme park)">
+                <button onclick="performSearch()">Search</button>
+            </div>
+        </header>
+
+        <div id="defaultView">
+            <div class="movie-grid" id="movieGrid">
+                <!-- Dynamic Content -->
+            </div>
+        </div>
+
+        <div class="search-results-section" id="searchResults">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                <h2>🔍 Search Results</h2>
+                <button onclick="closeSearch()" style="width: auto; background: transparent; color: white; border: 1px solid white;">Close Search</button>
+            </div>
+            <div id="resultsList"></div>
+        </div>
+
+        <div class="recommendation-panel">
+            <h3>✨ Real-time Results (Feedback Loop)</h3>
+            <div id="recContainer">Waiting for activity...</div>
+        </div>
+    </div>
+
+    <div class="sidebar">
+        <h2>📡 Live Kafka Feed</h2>
+        <div class="feed-container" id="kafkaFeed">
+            <!-- Dynamic Messages -->
+        </div>
+    </div>
+
+    <script>
+        const movies = [
+            { id: 1, title: "Toy Story", img: "https://images.unsplash.com/photo-1594736797933-d0501ba2fe65?w=400" },
+            { id: 318, title: "The Shawshank Redemption", img: "https://images.unsplash.com/photo-1536440136628-849c177e76a1?w=400" },
+            { id: 593, title: "Silence of the Lambs", img: "https://images.unsplash.com/photo-1509248961158-e54f6934749c?w=400" },
+            { id: 2571, title: "The Matrix", img: "https://images.unsplash.com/photo-1626814026160-2237a95fc5a0?w=400" },
+            { id: 110, title: "Braveheart", img: "https://images.unsplash.com/photo-1440404653325-ab127d49abc1?w=400" },
+            { id: 260, title: "Star Wars", img: "https://images.unsplash.com/photo-1579566346927-c68383817a25?w=400" }
+        ];
+
+        function renderMovies() {
+            const grid = document.getElementById('movieGrid');
+            grid.innerHTML = movies.map(m => `
+                <div class="movie-card">
+                    <img src="${m.img}" alt="${m.title}">
+                    <div class="card-info">
+                        <h3>${m.title}</h3>
+                        <div class="btn-group">
+                            <button class="btn-click" onclick="sendAction('click', ${m.id})">Click</button>
+                            <button class="btn-rate" onclick="sendAction('rate', ${m.id})">Rate 5★</button>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        async function performSearch() {
+            const q = document.getElementById('searchInput').value;
+            if (!q) return;
+
+            const res = await fetch(`/api/search?q=${encodeURIComponent(q)}`);
+            const data = await res.json();
+
+            document.getElementById('defaultView').style.display = 'none';
+            const container = document.getElementById('searchResults');
+            container.classList.add('active');
+
+            const list = document.getElementById('resultsList');
+            list.innerHTML = data.results.map(r => `
+                <div class="search-result-item">
+                    <h4>${r.title} <small style="color: grey">(${r.genres})</small></h4>
+                    <p>${r.description}</p>
+                    <div style="margin-top: 10px">
+                         <button class="btn-click" style="max-width: 100px" onclick="sendAction('click', ${r.id})">Click</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function closeSearch() {
+            document.getElementById('defaultView').style.display = 'block';
+            document.getElementById('searchResults').classList.remove('active');
+        }
+
+        async function sendAction(type, id) {
+            let url = type === 'click' ? `/api/click/${id}` : `/api/rate/${id}/5.0`;
+            await fetch(url);
+            console.log(`Action ${type} sent for movie ${id}`);
+        }
+
+        async function updateFeed() {
+            const res = await fetch('/api/feed');
+            const data = await res.json();
+            
+            const feed = document.getElementById('kafkaFeed');
+            feed.innerHTML = data.feed.map(item => `
+                <div class="feed-item">
+                    [${item.time.split('T')[1].split('.')[0]}] 
+                    <span class="type-${item.type}">${item.type}</span> 
+                    User ${item.user} → Movie ${item.movie} (${item.detail})
+                </div>
+            `).join('');
+
+            const rec = document.getElementById('recContainer');
+            if (data.recommendations.length > 0) {
+                rec.innerHTML = data.recommendations.map(r => `<div>🔹 ${r}</div>`).join('');
+            }
+        }
+
+        renderMovies();
+        setInterval(updateFeed, 1000);
+    </script>
+</body>
+</html>

@@ -1,0 +1,25 @@
+# Environments
+bigdata_env/
+env/
+venv/
+.venv/
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# Data (Avoid uploading large datasets)
+data/*.csv
+data/*.json
+
+# IDEs & OS
+.vscode/
+.idea/
+.DS_Store
+
+# Package metadata
+build/
+dist/
+*.egg-info/

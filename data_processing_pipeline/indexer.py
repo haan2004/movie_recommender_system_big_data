@@ -1,0 +1,74 @@
+import pandas as pd
+from qdrant_client import QdrantClient
+from qdrant_client.http.models import Distance, VectorParams, PointStruct
+from sentence_transformers import SentenceTransformer
+import uuid
+
+# 1. Initialize Qdrant Client (Connecting to your docker container)
+qdrant = QdrantClient(host="localhost", port=6333)
+collection_name = "movie_content"
+
+# Modern approach: Check if exists, then create (replaces deprecated recreate_collection)
+if qdrant.collection_exists(collection_name):
+    qdrant.delete_collection(collection_name)
+
+qdrant.create_collection(
+    collection_name=collection_name,
+    vectors_config=VectorParams(size=384, distance=Distance.COSINE),
+)
+
+# 2. Load the Local Embedding Model (Free, Fast, No API keys!)
+print("Loading Embedding Model (this takes a few seconds)...")
+model = SentenceTransformer('all-MiniLM-L6-v2')
+
+# 3. Load and Clean the Data
+print("Loading process_movie.csv...")
+df = pd.read_csv('data/process_movie.csv')
+
+# Fix the 12 missing years by filling them with 'Unknown'
+df['year'] = df['year'].fillna('Unknown')
+# Convert year to string so it doesn't print as 1995.0
+df['year'] = df['year'].astype(str).str.replace('.0', '', regex=False)
+
+# 4. Generate the Vector Database Payload
+print("Generating Embeddings and Upserting to Qdrant...")
+points = []
+batch_size = 250 # Process in chunks to keep memory usage low
+
+for index, row in df.iterrows():
+    # THE FIX: Create a rich, semantic sentence for the AI
+    # Example: "Title: Toy Story (1995). Genres: Adventure, Animation. Description: Led by Woody..."
+    rich_text = f"Title: {row['title']} ({row['year']}). Genres: {row['genres']}. Description: {row['description']}"
+    
+    # Generate embedding locally
+    vector = model.encode(rich_text).tolist()
+    
+    # Define what data we want to retrieve when a user searches
+    metadata_payload = {
+        "movie_ref": int(row['movieId']),
+        "title": str(row['title']),
+        "genres": str(row['genres']),
+        "year": str(row['year']),
+        "description": str(row['description'])
+    }
+    
+    # Qdrant requires a UUID for each record
+    point_uuid = str(uuid.uuid5(uuid.NAMESPACE_DNS, str(row['movieId'])))
+    
+    points.append(PointStruct(
+        id=point_uuid, 
+        vector=vector, 
+        payload=metadata_payload
+    ))
+    
+    # Batch Upsert to Qdrant
+    if len(points) >= batch_size:
+        qdrant.upsert(collection_name=collection_name, points=points)
+        points = []
+        print(f"Upserted up to movie index {index} / {len(df)}")
+
+# Don't forget the last partial batch
+if points:
+    qdrant.upsert(collection_name=collection_name, points=points)
+
+print("SUCCESS! All 26,619 movies are now indexed and searchable in Qdrant.")

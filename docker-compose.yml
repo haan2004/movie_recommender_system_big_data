@@ -1,0 +1,41 @@
+services:
+  recsys-kafka-setup:
+    image: alpine
+    command: chown -R 1000:1000 /tmp/kraft-combined-logs
+    volumes:
+      - recsys-kafka-data:/tmp/kraft-combined-logs
+
+  recsys-kafka:
+    image: confluentinc/cp-kafka:7.9.3
+    container_name: recsys-kafka
+    depends_on:
+      recsys-kafka-setup:
+        condition: service_completed_successfully
+    ports:
+      - "9092:9092"
+    environment:
+      KAFKA_KRAFT_MODE: "true"
+      CLUSTER_ID: "MkU3OEVBNTcwNTJENDM2QA"
+      KAFKA_NODE_ID: 1
+      KAFKA_PROCESS_ROLES: broker,controller
+      # CRITICAL: Updated to match the new service name 'recsys-kafka'
+      KAFKA_CONTROLLER_QUORUM_VOTERS: 1@recsys-kafka:9093
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9092,CONTROLLER://0.0.0.0:9093
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://localhost:9092
+      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,CONTROLLER:PLAINTEXT
+      KAFKA_LOG_DIRS: /tmp/kraft-combined-logs
+    volumes:
+      - recsys-kafka-data:/tmp/kraft-combined-logs
+  recsys-qdrant:
+    image: qdrant/qdrant:latest
+    container_name: recsys-qdrant
+    ports:
+      - "6333:6333"
+      - "6334:6334"
+    volumes:
+      - qdrant_data:/qdrant/storage
+volumes:
+  recsys-kafka-data:
+  qdrant_data:
