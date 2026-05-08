@@ -81,8 +81,6 @@ def poster_url(value):
     value = str(value)
     if value.lower() == 'nan':
         return ''
-    if value.startswith('http'):
-        return value
     if value.startswith('/'):
         return f'{POSTER_BASE_URL}{value}'
     return value
@@ -95,11 +93,7 @@ def movie_from_payload(payload, score=None):
         "genres": str(payload.get('genres', '')),
         "year": str(payload.get('year', 'Unknown')),
         "description": str(payload.get('description', '')),
-        "poster": poster_url(
-            payload.get('poster')
-            or payload.get('poster_url')
-            or payload.get('poster_path')
-        ),
+        "poster": poster_url(str(payload.get('poster_path', ''))),
     }
     if score is not None:
         movie["score"] = float(score)

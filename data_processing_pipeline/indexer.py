@@ -44,16 +44,13 @@ for index, row in df.iterrows():
     vector = model.encode(rich_text).tolist()
     
     # Define what data we want to retrieve when a user searches
-    poster = str(row.get("poster", row.get("poster_url", row.get("poster_path", ""))))
     metadata_payload = {
         "movie_ref": int(row['movieId']),
         "title": str(row['title']),
         "genres": str(row['genres']),
         "year": str(row['year']),
         "description": str(row['description']),
-        "poster": poster,
-        "poster_url": poster,
-        "poster_path": poster
+        "poster_path": str(row['poster']),
     }
     
     # Qdrant requires a UUID for each record

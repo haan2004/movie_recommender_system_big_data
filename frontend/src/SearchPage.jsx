@@ -3,16 +3,28 @@ import { searchMovies } from './action'
 import { ExtendedCard } from './components/Card'
 import Recommendation from './components/Recommendation'
 
+const RESULTS_PER_PAGE = 5
+
 function SearchPage({ query, recommendations, onOpenMovie }) {
   const [searchState, setSearchState] = useState({
     query: '',
     results: [],
     error: '',
   })
+  const [pagination, setPagination] = useState({ query: '', page: 1 })
   const trimmedQuery = query.trim()
   const isCurrentQuery = searchState.query === trimmedQuery
   const results = trimmedQuery && isCurrentQuery ? searchState.results : []
+  const totalPages = Math.max(1, Math.ceil(results.length / RESULTS_PER_PAGE))
+  const resultPage = pagination.query === trimmedQuery ? pagination.page : 1
+  const currentPage = Math.min(resultPage, totalPages)
+  const pageStart = (currentPage - 1) * RESULTS_PER_PAGE
+  const visibleResults = results.slice(pageStart, pageStart + RESULTS_PER_PAGE)
   const status = getSearchStatus(trimmedQuery, searchState, isCurrentQuery)
+
+  function setResultPage(page) {
+    setPagination({ query: trimmedQuery, page })
+  }
 
   useEffect(() => {
     let isMounted = true
@@ -58,10 +70,45 @@ function SearchPage({ query, recommendations, onOpenMovie }) {
         </div>
 
         <div className="result-list">
-          {results.map((movie) => (
+          {visibleResults.map((movie) => (
             <ExtendedCard key={movie.id} movie={movie} query={trimmedQuery} onOpen={onOpenMovie} />
           ))}
         </div>
+
+        {results.length > RESULTS_PER_PAGE && (
+          <nav className="pagination" aria-label="Search result pages">
+            <button
+              type="button"
+              onClick={() => setResultPage(Math.max(1, currentPage - 1))}
+              disabled={currentPage === 1}
+            >
+              Previous
+            </button>
+            <div className="page-numbers">
+              {Array.from({ length: totalPages }, (_, index) => {
+                const page = index + 1
+                return (
+                  <button
+                    key={page}
+                    type="button"
+                    className={page === currentPage ? 'active' : ''}
+                    aria-current={page === currentPage ? 'page' : undefined}
+                    onClick={() => setResultPage(page)}
+                  >
+                    {page}
+                  </button>
+                )
+              })}
+            </div>
+            <button
+              type="button"
+              onClick={() => setResultPage(Math.min(totalPages, currentPage + 1))}
+              disabled={currentPage === totalPages}
+            >
+              Next
+            </button>
+          </nav>
+        )}
       </section>
 
       <Recommendation movies={recommendations} onOpen={onOpenMovie} />

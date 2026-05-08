@@ -48,7 +48,8 @@ function MovieDetail({ movieId, recommendations, onOpenMovie, onRated }) {
       return
     }
 
-    const confirmed = window.confirm(`Send ${rating} star rating for "${movie.title}"?`)
+    const ratingLabel = `${rating} star${rating === 1 ? '' : 's'}`
+    const confirmed = window.confirm(`Send ${ratingLabel} for "${movie.title}"?`)
     if (!confirmed) {
       return
     }
@@ -56,7 +57,7 @@ function MovieDetail({ movieId, recommendations, onOpenMovie, onRated }) {
     setRatingStatus({ movieId: movie.id, text: 'Sending rating...' })
     try {
       await sendRateAction(movie.id, rating)
-      setRatingStatus({ movieId: movie.id, text: `Rated ${rating} stars.` })
+      setRatingStatus({ movieId: movie.id, text: `Rated ${ratingLabel}.` })
       onRated?.()
     } catch {
       setRatingStatus({
@@ -99,9 +100,10 @@ function MovieDetail({ movieId, recommendations, onOpenMovie, onRated }) {
                         name="rating"
                         value={value}
                         checked={rating === value}
+                        aria-label={`${value} star${value === 1 ? '' : 's'}`}
                         onChange={() => setRating(value)}
                       />
-                      <span>{value}</span>
+                      <span aria-hidden="true">★</span>
                     </label>
                   ))}
                 </div>
