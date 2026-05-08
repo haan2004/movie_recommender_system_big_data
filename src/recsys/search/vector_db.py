@@ -25,12 +25,16 @@ class MovieVectorDB:
         for index, row in df.iterrows():
             rich_text = f"Title: {row['title']} ({row.get('year', 'Unknown')}). Genres: {row['genres']}. Description: {row['description']}"
             vector = self.model.encode(rich_text).tolist()
+            poster = str(row.get('poster', row.get('poster_url', row.get('poster_path', ''))))
             
             payload = {
                 "movie_ref": int(row['movieId']),
                 "title": str(row['title']),
                 "genres": str(row['genres']),
-                "description": str(row['description'])
+                "year": str(row.get('year', 'Unknown')),
+                "description": str(row['description']),
+                "poster": poster,
+                "poster_url": poster
             }
             
             points.append(PointStruct(
@@ -45,7 +49,7 @@ class MovieVectorDB:
         if points:
             self.client.upsert(collection_name=self.collection_name, points=points)
 
-    def search(self, query_text, limit=5):
+    def search(self, query_text, limit=20):
         vector = self.model.encode(query_text).tolist()
         results = self.client.query_points(
             collection_name=self.collection_name,
@@ -54,7 +58,15 @@ class MovieVectorDB:
         )
         return results.points
 
-    def get_recommendations(self, movie_id, limit=5):
+    def get_movie(self, movie_id):
+        points = self.client.retrieve(
+            collection_name=self.collection_name,
+            ids=[self.generate_uuid(movie_id)],
+            with_payload=True
+        )
+        return points[0] if points else None
+
+    def get_recommendations(self, movie_id, limit=20):
         point_id = self.generate_uuid(movie_id)
         points = self.client.retrieve(
             collection_name=self.collection_name,

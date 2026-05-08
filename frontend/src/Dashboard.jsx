@@ -1,0 +1,89 @@
+import { useEffect, useState } from 'react'
+import { fetchTrending } from './action'
+import Recommendation, { MovieRow } from './components/Recommendation'
+
+const placeholderTrending = [
+  {
+    id: 1,
+    title: 'Toy Story',
+    genres: 'Adventure, Animation, Comedy',
+    year: '1995',
+    description: 'A cowboy doll feels threatened when a new space ranger toy joins the room.',
+  },
+  {
+    id: 318,
+    title: 'The Shawshank Redemption',
+    genres: 'Crime, Drama',
+    year: '1994',
+    description: 'Two imprisoned men bond over years of survival and quiet hope.',
+  },
+  {
+    id: 356,
+    title: 'Forrest Gump',
+    genres: 'Comedy, Drama, Romance',
+    year: '1994',
+    description: 'A kind-hearted man crosses paths with defining moments in American history.',
+  },
+  {
+    id: 593,
+    title: 'The Silence of the Lambs',
+    genres: 'Crime, Horror, Thriller',
+    year: '1991',
+    description: 'An FBI trainee seeks insight from a brilliant imprisoned killer.',
+  },
+  {
+    id: 2571,
+    title: 'The Matrix',
+    genres: 'Action, Sci-Fi, Thriller',
+    year: '1999',
+    description: 'A hacker discovers the world he knows is a simulation.',
+  },
+  {
+    id: 260,
+    title: 'Star Wars',
+    genres: 'Action, Adventure, Sci-Fi',
+    year: '1977',
+    description: 'A farm boy joins a rebellion against a galaxy-spanning empire.',
+  },
+]
+
+function Dashboard({ recommendations, onOpenMovie }) {
+  const [trending, setTrending] = useState(placeholderTrending)
+
+  useEffect(() => {
+    let isMounted = true
+
+    fetchTrending()
+      .then((data) => {
+        if (isMounted && data.movies?.length > 0) {
+          setTrending(data.movies)
+        }
+      })
+      .catch(() => {
+        setTrending(placeholderTrending)
+      })
+
+    return () => {
+      isMounted = false
+    }
+  }, [])
+
+  return (
+    <div className="page-stack">
+      <section className="welcome-panel">
+        <h1>Find a film, click what looks good, and rate it after watching.</h1>
+      </section>
+
+      <MovieRow
+        title="Top trending"
+        movies={trending}
+        emptyText="Trending will appear here after the backend job is connected."
+        onOpen={onOpenMovie}
+      />
+
+      <Recommendation movies={recommendations} onOpen={onOpenMovie} />
+    </div>
+  )
+}
+
+export default Dashboard
