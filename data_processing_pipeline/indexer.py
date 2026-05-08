@@ -1,8 +1,19 @@
 import pandas as pd
+import re
 from qdrant_client import QdrantClient
 from qdrant_client.http.models import Distance, VectorParams, PointStruct
 from sentence_transformers import SentenceTransformer
 import uuid
+
+TRAILING_ARTICLE_RE = re.compile(r'^(?P<title>.+),\s*(?P<article>The|A|An)(?P<year>\s+\(\d{4}\))?\s*$')
+
+
+def display_title(value):
+    title = str(value or 'Unknown').strip()
+    match = TRAILING_ARTICLE_RE.match(title)
+    if not match:
+        return title
+    return f"{match.group('article')} {match.group('title')}{match.group('year') or ''}"
 
 # 1. Initialize Qdrant Client (Connecting to your docker container)
 qdrant = QdrantClient(host="localhost", port=6333)
@@ -36,9 +47,10 @@ points = []
 batch_size = 250 # Process in chunks to keep memory usage low
 
 for index, row in df.iterrows():
+    title = display_title(row['title'])
     # THE FIX: Create a rich, semantic sentence for the AI
     # Example: "Title: Toy Story (1995). Genres: Adventure, Animation. Description: Led by Woody..."
-    rich_text = f"Title: {row['title']} ({row['year']}). Genres: {row['genres']}. Description: {row['description']}"
+    rich_text = f"Title: {title} ({row['year']}). Genres: {row['genres']}. Description: {row['description']}"
     
     # Generate embedding locally
     vector = model.encode(rich_text).tolist()
@@ -46,7 +58,7 @@ for index, row in df.iterrows():
     # Define what data we want to retrieve when a user searches
     metadata_payload = {
         "movie_ref": int(row['movieId']),
-        "title": str(row['title']),
+        "title": title,
         "genres": str(row['genres']),
         "year": str(row['year']),
         "description": str(row['description']),

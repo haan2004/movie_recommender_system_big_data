@@ -78,6 +78,12 @@ The system follows a modern decoupled architecture for processing and recommendi
    ```bash
    python kafka_streaming/web_dashboard.py
    ```
+5. **Run frontend**:
+    ```bash
+   cd frontend
+   npm run dev -- --host
+   ```
+   Some urls may not work in WSL so try opening all 3 of them
 
 ---
 

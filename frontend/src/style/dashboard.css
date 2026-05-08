@@ -30,7 +30,6 @@
   background: transparent;
   color: inherit;
   text-align: left;
-  cursor: pointer;
 }
 
 .brand-mark {
@@ -83,12 +82,11 @@
   background: var(--primary-color);
   color: #ffffff;
   font-weight: 800;
-  cursor: pointer;
 }
 
 .app-layout {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 340px;
+  grid-template-columns: minmax(0, 1fr) 260px;
   align-items: start;
   min-height: calc(100svh - 81px);
   overflow: hidden;
@@ -102,7 +100,7 @@
 
 .page-stack {
   display: grid;
-  gap: 30px;
+  gap: 100px;
   min-width: 0;
 }
 
@@ -278,8 +276,12 @@ h3 {
 .meta-line {
   margin: 8px 0 0;
   color: #a7adbb;
-  font-size: 13px;
+  font-size: 1rem;
   line-height: 1.4;
+}
+
+.movie-card .meta-line {
+  font-size: 0.8rem;
 }
 
 .empty-row,
@@ -319,7 +321,6 @@ h3 {
   color: #d9dce3;
   font: inherit;
   font-weight: 800;
-  cursor: pointer;
 }
 
 .pagination button:hover:not(:disabled),
@@ -399,6 +400,7 @@ mark {
   color: #d9dce3;
   font-size: 17px;
   line-height: 1.65;
+  text-align: justify;
 }
 
 .rating-form {
@@ -419,58 +421,55 @@ mark {
 }
 
 .star-options {
-  display: grid;
-  grid-template-columns: repeat(5, 42px);
+  display: flex;
+  flex-direction: row-reverse;
+  justify-content: flex-end;
   gap: 8px;
 }
 
 .star-options label {
   display: grid;
+  width: 42px;
   height: 42px;
   place-items: center;
-  border: 1px solid transparent;
-  border-radius: 6px;
-  background: transparent;
-  color: #525866;
   cursor: pointer;
   transition:
-    color 160ms ease,
-    filter 160ms ease,
-    transform 160ms ease;
+    transform 160ms ease,
+    filter 160ms ease;
 }
 
-.star-options label.selected {
-  color: var(--primary-color);
-  filter: drop-shadow(0 0 8px rgba(96, 190, 249, 0.42));
+/* default grey stars */
+.star-options span {
+  font-size: 34px;
+  line-height: 1;
+  color: #525866;
 }
 
+/* hovered stars */
+.star-options label:hover span,
+.star-options label:hover ~ label span,
 .star-options label.selected span {
+  background: linear-gradient(
+    180deg,
+    #e4f6ff,
+    var(--primary-color) 58%,
+    #229ae5
+  );
+  -webkit-background-clip: text;
+  background-clip: text;
   color: transparent;
 }
 
+/* glow + movement */
 .star-options label:hover,
-.star-options label:has(input:focus-visible) {
-  color: #ffffff;
+.star-options label:hover ~ label,
+.star-options label.selected {
+  filter: drop-shadow(0 0 8px rgba(96, 190, 249, 0.42));
+}
+
+.star-options label:hover,
+.star-options label:hover ~ label {
   transform: translateY(-1px);
-}
-
-.star-options label:has(input:focus-visible) {
-  outline: 2px solid rgba(96, 190, 249, 0.8);
-  outline-offset: 2px;
-}
-
-.star-options span {
-  background: linear-gradient(180deg, #e4f6ff, var(--primary-color) 58%, #229ae5);
-  background-clip: text;
-  font-size: 34px;
-  line-height: 1;
-  -webkit-background-clip: text;
-}
-
-.star-options label:not(.selected) span {
-  background: none;
-  background-clip: initial;
-  -webkit-background-clip: initial;
 }
 
 .star-options input {
@@ -478,6 +477,57 @@ mark {
   inline-size: 1px;
   block-size: 1px;
   opacity: 0;
+}
+/* Fractional star fill for average display */
+.star {
+  position: relative;
+  display: inline-block;
+  width: 42px;
+  height: 42px;
+  text-align: center;
+  vertical-align: middle;
+}
+.star-empty {
+  color: #525866;
+  font-size: 34px;
+  line-height: 42px;
+}
+.star-fill {
+  position: absolute;
+  left: 0;
+  top: 0;
+  height: 42px;
+  overflow: hidden;
+  white-space: nowrap;
+  width: 0%;
+  -webkit-background-clip: text;
+  background: linear-gradient(180deg, #e4f6ff, var(--primary-color) 58%, #229ae5);
+  background-clip: text;
+  color: transparent;
+  font-size: 34px;
+  line-height: 42px;
+}
+
+.average-line {
+  display: flex;
+  align-items: baseline;
+  gap: 3rem
+}
+
+.avg-number {
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--primary-color);
+}
+
+.avg-count {
+  color: #a7adbb;
+}
+
+.avg-number .secondary {
+  font-weight: normal;
+  font-size: 1.5rem;
+  color: #a7adbb;
 }
 
 .status-line {
@@ -487,7 +537,7 @@ mark {
 .sidebar {
   position: sticky;
   top: 81px;
-  min-height: calc(100svh - 81px);
+  /* /* min-height: calc(100svh - 81px); */
   height: calc(100svh - 81px);
   overflow: hidden;
   padding: 24px 18px;
@@ -538,7 +588,6 @@ mark {
 
 @media (max-width: 960px) {
   .navbar,
-  .app-layout,
   .detail-layout {
     grid-template-columns: 1fr;
   }

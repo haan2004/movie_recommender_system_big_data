@@ -63,6 +63,8 @@ function SearchPage({ query, recommendations, onOpenMovie }) {
 
   return (
     <div className="page-stack">
+      <title>Search | Let's Watch!</title>
+
       <section className="search-results">
         <div className="row-heading">
           <h1>Search results</h1>

@@ -1,3 +1,5 @@
+import { formatGenres } from '../action'
+
 const fallbackLabels = ['Stream', 'Movie', 'Cinema', 'Watch']
 
 function Poster({ movie, compact = false }) {
@@ -13,6 +15,7 @@ function Poster({ movie, compact = false }) {
   )
 }
 
+
 function Card({ movie, onOpen }) {
   const year = movie.year && movie.year !== 'Unknown' ? movie.year : ''
 
@@ -24,7 +27,7 @@ function Card({ movie, onOpen }) {
       <div className="movie-info">
         <h3>{movie.title}</h3>
         <p className="meta-line">
-          {[year, movie.genres].filter(Boolean).join(' • ')}
+          {[year, formatGenres(movie.genres)].filter(Boolean).join(' • ')}
         </p>
       </div>
     </button>
@@ -42,7 +45,7 @@ function ExtendedCard({ movie, query, onOpen }) {
       <div className="extended-copy">
         <h3>{highlightText(movie.title, query)}</h3>
         <p className="meta-line">
-          {[year, movie.genres].filter(Boolean).join(' • ')}
+          {[year, formatGenres(movie.genres)].filter(Boolean).join(' • ')}
         </p>
         <p>{highlightText(movie.description || 'No description available.', query)}</p>
       </div>

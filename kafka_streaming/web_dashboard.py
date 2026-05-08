@@ -1,5 +1,6 @@
 import json
 import os
+import re
 import sys
 import threading
 
@@ -14,6 +15,7 @@ app = Flask(__name__)
 
 POSTER_BASE_URL = 'https://image.tmdb.org/t/p/w500'
 USER_ID = 1337
+TRAILING_ARTICLE_RE = re.compile(r'^(?P<title>.+),\s*(?P<article>The|A|An)(?P<year>\s+\(\d{4}\))?\s*$')
 
 live_feed = []
 recommendations = []
@@ -86,10 +88,18 @@ def poster_url(value):
     return value
 
 
+def display_title(value):
+    title = str(value or 'Unknown').strip()
+    match = TRAILING_ARTICLE_RE.match(title)
+    if not match:
+        return title
+    return f"{match.group('article')} {match.group('title')}{match.group('year') or ''}"
+
+
 def movie_from_payload(payload, score=None):
     movie = {
         "id": int(payload.get('movie_ref', payload.get('id', 0))),
-        "title": str(payload.get('title', 'Unknown')),
+        "title": display_title(payload.get('title', 'Unknown')),
         "genres": str(payload.get('genres', '')),
         "year": str(payload.get('year', 'Unknown')),
         "description": str(payload.get('description', '')),
@@ -229,10 +239,18 @@ def get_movie(movie_id):
         return jsonify({"error": "Movie lookup unavailable"}), 503
 
 
+# TODO: GET TOP TRENDING MOVIES
 @app.route('/api/trending')
 def trending():
     return jsonify({"movies": TRENDING_PLACEHOLDERS})
 
+# TODO: GET AVERAGE RATING, RATING COUNT FOR A MOVIE
+@app.route('/api/average_rating/<int:movie_id>')
+def average_rating(movie_id):
+    return jsonify({
+        "movie_id": movie_id, "avg_rating": 4.2,
+        "rating_count": 1234
+        })
 
 if __name__ == '__main__':
     app.run(debug=True, port=5001, use_reloader=False)

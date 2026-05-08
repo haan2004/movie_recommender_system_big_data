@@ -1,7 +1,19 @@
+import re
+import uuid
+
 from qdrant_client import QdrantClient
 from qdrant_client.http.models import Distance, VectorParams, PointStruct
 from sentence_transformers import SentenceTransformer
-import uuid
+
+TRAILING_ARTICLE_RE = re.compile(r'^(?P<title>.+),\s*(?P<article>The|A|An)(?P<year>\s+\(\d{4}\))?\s*$')
+
+
+def display_title(value):
+    title = str(value or 'Unknown').strip()
+    match = TRAILING_ARTICLE_RE.match(title)
+    if not match:
+        return title
+    return f"{match.group('article')} {match.group('title')}{match.group('year') or ''}"
 
 class MovieVectorDB:
     def __init__(self, host="localhost", port=6333, collection_name="movie_content"):
@@ -23,13 +35,14 @@ class MovieVectorDB:
     def upsert_movies(self, df, batch_size=250):
         points = []
         for index, row in df.iterrows():
-            rich_text = f"Title: {row['title']} ({row.get('year', 'Unknown')}). Genres: {row['genres']}. Description: {row['description']}"
+            title = display_title(row['title'])
+            rich_text = f"Title: {title} ({row.get('year', 'Unknown')}). Genres: {row['genres']}. Description: {row['description']}"
             vector = self.model.encode(rich_text).tolist()
             poster = str(row.get('poster', row.get('poster_url', row.get('poster_path', ''))))
             
             payload = {
                 "movie_ref": int(row['movieId']),
-                "title": str(row['title']),
+                "title": title,
                 "genres": str(row['genres']),
                 "year": str(row.get('year', 'Unknown')),
                 "description": str(row['description']),

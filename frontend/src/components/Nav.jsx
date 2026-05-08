@@ -15,10 +15,7 @@ function Nav({ initialQuery = '', onNavigate, onSearch }) {
     <nav className="navbar">
       <button type="button" className="brand" onClick={() => onNavigate('/')}>
         <span className="brand-mark">LW</span>
-        <span>
-          <div className="eyebrow">Let's Watch!</div>
-          <small>Realtime recommender</small>
-        </span>
+        <div className="eyebrow">Let's Watch!</div>
       </button>
 
       <form className="search-bar" onSubmit={handleSubmit}>

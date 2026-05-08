@@ -24,3 +24,13 @@ body {
 #root {
   min-height: 100svh;
 }
+
+input::placeholder {
+  font-style: italic;
+}
+
+button, a {
+  cursor: pointer;
+  text-decoration: none;
+  color: inherit;
+}

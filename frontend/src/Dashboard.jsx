@@ -71,11 +71,11 @@ function Dashboard({ recommendations, onOpenMovie }) {
   return (
     <div className="page-stack">
       <section className="welcome-panel">
-        <h1>Find a film, click what looks good, and rate it after watching.</h1>
+        <h1> A real-time movie recommendation system</h1>
       </section>
 
       <MovieRow
-        title="Top trending"
+        title="Top Trending"
         movies={trending}
         emptyText="Trending will appear here after the backend job is connected."
         onOpen={onOpenMovie}

@@ -26,9 +26,9 @@ function MovieRow({ title, movies = [], emptyText, onOpen }) {
 function Recommendation({ movies = [], onOpen }) {
   return (
     <MovieRow
-      title="Recommended for you"
+      title="Recommended for You"
       movies={movies}
-      emptyText="Click or rate a movie to refresh this row."
+      emptyText="Let's explore some movies so we can find the best recommendations for you!"
       onOpen={onOpen}
     />
   )
