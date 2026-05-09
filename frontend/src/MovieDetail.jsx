@@ -114,8 +114,17 @@ function MovieDetail({ movieId, recommendations, onOpenMovie, onRated }) {
 
           <div className="detail-copy">
             <h1>{movie.title}</h1>
-            <p className="meta-line">
-              {[movie.year, formatGenres(movie.genres)].filter(Boolean).join(' • ')}
+            <p className="meta-line d-flex align-items-center flex-wrap gap-5 mt-4">
+              {movie.year && <span>{movie.year}</span>}
+              {movie.genres ? (
+                <span className="d-flex align-items-center flex-wrap gap-2">
+                  {formatGenres(movie.genres)
+                    .split(',')
+                    .map((g) => (
+                      <span className="genre-tag" key={g.trim()}>{g.trim()}</span>
+                    ))}
+                </span>
+              ) : null}
             </p>
             <p className="description">{movie.description || 'No description available.'}</p>
 

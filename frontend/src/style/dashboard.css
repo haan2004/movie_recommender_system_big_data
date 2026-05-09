@@ -11,10 +11,10 @@
   top: 0;
   z-index: 10;
   display: grid;
-  grid-template-columns: minmax(180px, 320px) minmax(260px, 620px);
-  gap: 24px;
+  grid-template-columns: minmax(180px, 320px) minmax(0, 1fr) auto;
+  gap: 16px;
   align-items: center;
-  padding: 18px 28px;
+  padding: 12px 20px;
   background: rgba(14, 15, 18, 0.92);
   border-bottom: 1px solid rgba(255, 255, 255, 0.08);
   backdrop-filter: blur(16px);
@@ -65,6 +65,46 @@
   min-height: 44px;
   border-radius: 6px;
   font: inherit;
+}
+
+/* User profile in navbar */
+.user-profile {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding-left: 12px;
+}
+.user-profile .avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: linear-gradient(180deg, var(--primary-color), #229ae5);
+  color: #fff;
+  display: grid;
+  place-items: center;
+  font-weight: 900;
+}
+.user-profile .user-info {
+  display: flex;
+  flex-direction: column;
+  line-height: 1;
+}
+.user-profile .user-label {
+  color: #a7adbb;
+  font-size: 0.7rem;
+}
+.user-profile .user-id {
+  color: #ffffff;
+  font-weight: 800;
+  font-size: 0.95rem;
+}
+.user-profile .user-edit {
+  margin-left: 6px;
+  border: 0;
+  background: transparent;
+  color: #a7adbb;
+  cursor: pointer;
+  font-size: 14px;
 }
 
 .search-bar input {
@@ -280,9 +320,21 @@ h3 {
 .meta-line {
   margin: 8px 0 0;
   color: #a7adbb;
-  font-size: 1rem;
   line-height: 1.4;
 }
+
+/* Genre tag styles */
+.genre-tag {
+  display: inline-block;
+  padding: 4px 8px;
+  background: rgba(96, 190, 249, 0.12);
+  color: #dff4ff;
+  font-size: 0.78rem;
+  font-weight: 600;
+  text-transform: capitalize;
+  border: 1px solid rgba(96, 190, 249, 0.18);
+}
+
 
 .movie-card .meta-line {
   font-size: 0.8rem;

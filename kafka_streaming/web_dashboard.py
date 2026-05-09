@@ -180,7 +180,12 @@ def index():
 
 @app.route('/api/click/<int:movie_id>')
 def click_movie(movie_id):
-    producer.track_click(user_id=USER_ID, movie_id=movie_id)
+    # Accept an optional user_id from the frontend (query param or header) for demo purposes
+    try:
+        user_id = int(request.args.get('user_id') or request.headers.get('X-User-Id') or USER_ID)
+    except Exception:
+        user_id = USER_ID
+    producer.track_click(user_id=user_id, movie_id=movie_id)
     refresh_recommendations(movie_id)
     return jsonify({
         "status": "success",
@@ -191,7 +196,11 @@ def click_movie(movie_id):
 
 @app.route('/api/rate/<int:movie_id>/<float:score>')
 def rate_movie(movie_id, score):
-    producer.track_rating(user_id=USER_ID, movie_id=movie_id, rating=score)
+    try:
+        user_id = int(request.args.get('user_id') or request.headers.get('X-User-Id') or USER_ID)
+    except Exception:
+        user_id = USER_ID
+    producer.track_rating(user_id=user_id, movie_id=movie_id, rating=score)
     refresh_recommendations(movie_id)
     return jsonify({
         "status": "success",

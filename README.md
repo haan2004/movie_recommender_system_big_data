@@ -79,6 +79,7 @@ The system follows a modern decoupled architecture for processing and recommendi
    python kafka_streaming/web_dashboard.py
    ```
 5. **Run frontend**:
+    open a new terminal
     ```bash
    cd frontend
    npm run dev -- --host

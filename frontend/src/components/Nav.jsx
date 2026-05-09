@@ -1,7 +1,22 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 
 function Nav({ initialQuery = '', onNavigate, onSearch }) {
   const [query, setQuery] = useState(initialQuery)
+
+  // User ID
+  const [userId, setUserId] = useState(() => {
+    try {
+      return localStorage.getItem('currentUserId') || '1337'
+    } catch {
+      return '1337'
+    }
+  })
+
+  useEffect(() => {
+    try {
+      localStorage.setItem('currentUserId', String(userId))
+    } catch {}
+  }, [userId])
 
   function handleSubmit(event) {
     event.preventDefault()
@@ -28,6 +43,27 @@ function Nav({ initialQuery = '', onNavigate, onSearch }) {
         />
         <button type="submit">Search</button>
       </form>
+
+      <div className="user-profile" title={`Current user: ${userId}`}>
+        <div className="avatar">U</div>
+        <div className="user-info">
+          <div className="user-label">User</div>
+          <div className="user-id">{userId}</div>
+        </div>
+        <button
+          type="button"
+          className="user-edit"
+          aria-label="Change user id"
+          onClick={() => {
+            const val = window.prompt('Set current user id (for demo):', String(userId))
+            if (val !== null && val.trim() !== '') {
+              setUserId(val.trim())
+            }
+          }}
+        >
+          ✎
+        </button>
+      </div>
     </nav>
   )
 }

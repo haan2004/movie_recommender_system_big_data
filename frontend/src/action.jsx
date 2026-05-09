@@ -7,11 +7,25 @@ async function fetchJson(url, options = {}) {
 }
 
 async function sendClickAction(movieId) {
-  return fetchJson(`/api/click/${movieId}`)
+  const userId = (() => {
+    try {
+      return localStorage.getItem('currentUserId') || '1337'
+    } catch {
+      return '1337'
+    }
+  })()
+  return fetchJson(`/api/click/${movieId}?user_id=${encodeURIComponent(userId)}`)
 }
 
 async function sendRateAction(movieId, rating) {
-  return fetchJson(`/api/rate/${movieId}/${Number(rating).toFixed(1)}`)
+  const userId = (() => {
+    try {
+      return localStorage.getItem('currentUserId') || '1337'
+    } catch {
+      return '1337'
+    }
+  })()
+  return fetchJson(`/api/rate/${movieId}/${Number(rating).toFixed(1)}?user_id=${encodeURIComponent(userId)}`)
 }
 
 async function searchMovies(query, limit = 50) {
