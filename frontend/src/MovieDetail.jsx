@@ -97,7 +97,7 @@ function MovieDetail({ movieId, recommendations, onOpenMovie, onRated }) {
   }
 
   return (
-    <div className="page-stack">
+    <div className="page-stack movie-detail">
       <title>Movie Detail | Let's Watch!</title>
 
       {movie ? (
@@ -141,36 +141,38 @@ function MovieDetail({ movieId, recommendations, onOpenMovie, onRated }) {
         <section className="empty-state">{status}</section>
       )}
 
-      <hr/>
-      {/* Your Rating Form */}
-      <form className="rating-form" onSubmit={handleSubmit}>
-        <fieldset>
-          <p className='fw-bold'>Rate this movie</p>
-          
-          <div className="star-options">
-            {[5, 4, 3, 2, 1].map((value) => (
-              <label
-                key={value}
-                className={value <= rating ? 'selected' : ''}
-              >
-                <input
-                  type="radio"
-                  name="rating"
-                  value={value}
-                  checked={rating === value}
-                  onChange={() => setRating(value)}
-                />
-                <span>★</span>
-              </label>
-            ))}
-          </div> 
+      <div className='mb-5'>
+        <hr/>
+        {/* Your Rating Form */}
+        <form className="rating-form" onSubmit={handleSubmit}>
+          <fieldset>
+            <p className='fw-bold'>Rate this movie</p>
+            
+            <div className="star-options">
+              {[5, 4, 3, 2, 1].map((value) => (
+                <label
+                  key={value}
+                  className={value <= rating ? 'selected' : ''}
+                >
+                  <input
+                    type="radio"
+                    name="rating"
+                    value={value}
+                    checked={rating === value}
+                    onChange={() => setRating(value)}
+                  />
+                  <span>★</span>
+                </label>
+              ))}
+            </div> 
 
-          {status && <p className="status-line">{status}</p>}
-       
-        </fieldset>
+            {status && <p className="status-line">{status}</p>}
+        
+          </fieldset>
 
-        <button type="submit">Submit rating</button>
-      </form>
+          <button type="submit">Submit rating</button>
+        </form>
+      </div>
 
       <Recommendation movies={recommendations} onOpen={onOpenMovie} />
     </div>
